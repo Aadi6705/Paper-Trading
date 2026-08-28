@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setIsSubmitting(true);
     try {
       await login(email, password);
+      toast.success('Successfully logged in!');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message || 'Login failed.');
     } finally {
       setIsSubmitting(false);
     }
@@ -26,14 +27,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md p-8 bg-bg-surface rounded-xl border border-border-subtle">
+      <div className="w-full max-w-md p-8 bg-bg-surface rounded-xl border border-border-subtle animate-in slide-in-from-bottom-4 fade-in duration-300">
         <h2 className="text-2xl font-bold mb-6 text-center">Log In to Trade</h2>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-danger/10 border border-danger text-danger rounded-lg text-sm">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

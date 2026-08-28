@@ -2,8 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { stockApi } from '../services/stockApi';
 import { Search } from 'lucide-react';
+import CountUp from '../components/CountUp';
+import { SkeletonTable } from '../components/Skeleton';
+import useFlashOnChange from '../hooks/useFlashOnChange';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+
+function PriceCell({ price }) {
+  const flashClass = useFlashOnChange(price);
+  return (
+    <td className={`p-4 tabular-nums text-right font-medium text-success`}>
+      <span className={`inline-block ${flashClass}`}>
+        <CountUp value={price} prefix="₹" />
+      </span>
+    </td>
+  );
+}
 
 export default function Markets() {
   const [stocks, setStocks] = useState([]);
@@ -39,7 +53,7 @@ export default function Markets() {
   );
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Markets</h1>
         <div className="relative">
@@ -56,7 +70,7 @@ export default function Markets() {
 
       <div className="bg-bg-surface rounded-xl border border-border-subtle overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-text-secondary">Loading market data...</div>
+          <SkeletonTable columns={5} rows={6} className="border-0 rounded-none" />
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
@@ -69,16 +83,18 @@ export default function Markets() {
               </tr>
             </thead>
             <tbody>
-              {filteredStocks.map(stock => (
-                <tr key={stock.id} className="border-b border-border-subtle hover:bg-bg-surface-raised transition-colors group">
+              {filteredStocks.map((stock, i) => (
+                <tr 
+                  key={stock.id} 
+                  className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both"
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
                   <td className="p-4 font-medium text-brand-primary">
                     <Link to={`/markets/${stock.symbol}`} className="hover:underline">{stock.symbol}</Link>
                   </td>
                   <td className="p-4 text-sm">{stock.companyName}</td>
                   <td className="p-4 text-sm text-text-secondary">{stock.sector}</td>
-                  <td className="p-4 tabular-nums text-right font-medium text-success">
-                    ₹{stock.currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                  </td>
+                  <PriceCell price={stock.currentPrice} />
                   <td className="p-4 text-right">
                     <Link 
                       to={`/markets/${stock.symbol}`}

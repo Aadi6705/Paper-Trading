@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { portfolioApi } from '../services/portfolioApi';
 import { Link } from 'react-router-dom';
+import CountUp from '../components/CountUp';
+import { SkeletonCard, SkeletonTable } from '../components/Skeleton';
 
 export default function Portfolio() {
   const [portfolio, setPortfolio] = useState(null);
@@ -18,13 +20,29 @@ export default function Portfolio() {
       });
   }, []);
 
-  if (loading) return <div className="p-8 text-center text-text-secondary">Loading portfolio...</div>;
+  if (loading) {
+    return (
+      <div className="p-8 max-w-6xl mx-auto animate-in fade-in duration-300">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold">My Portfolio</h1>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <SkeletonTable columns={7} rows={5} />
+      </div>
+    );
+  }
+  
   if (!portfolio) return <div className="p-8 text-center text-danger">Failed to load portfolio.</div>;
 
   const { summary, holdings } = portfolio;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">My Portfolio</h1>
         <Link to="/dashboard" className="px-4 py-2 bg-bg-surface border border-border-subtle rounded-lg hover:bg-bg-surface-raised transition-colors">
@@ -34,22 +52,32 @@ export default function Portfolio() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle hover:bg-bg-surface-raised transition-colors">
           <p className="text-sm text-text-secondary mb-1">Net Worth</p>
-          <p className="text-2xl font-bold tabular-nums">₹{summary.netWorth.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            <CountUp value={summary.netWorth} prefix="₹" />
+          </p>
         </div>
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle hover:bg-bg-surface-raised transition-colors">
           <p className="text-sm text-text-secondary mb-1">Total Invested</p>
-          <p className="text-2xl font-bold tabular-nums">₹{summary.totalInvested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            <CountUp value={summary.totalInvested} prefix="₹" />
+          </p>
         </div>
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle hover:bg-bg-surface-raised transition-colors">
           <p className="text-sm text-text-secondary mb-1">Current Value</p>
-          <p className="text-2xl font-bold tabular-nums">₹{summary.currentPortfolioValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            <CountUp value={summary.currentPortfolioValue} prefix="₹" />
+          </p>
         </div>
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle hover:bg-bg-surface-raised transition-colors">
           <p className="text-sm text-text-secondary mb-1">Overall P&L</p>
           <p className={`text-2xl font-bold tabular-nums ${summary.totalPnl >= 0 ? 'text-success' : 'text-danger'}`}>
-            {summary.totalPnl >= 0 ? '+' : ''}₹{summary.totalPnl.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            <CountUp 
+              value={summary.totalPnl} 
+              prefix={summary.totalPnl >= 0 ? '+₹' : '-₹'} 
+              valueOverride={Math.abs(summary.totalPnl)}
+            />
           </p>
         </div>
       </div>
@@ -74,19 +102,37 @@ export default function Portfolio() {
               </tr>
             </thead>
             <tbody>
-              {holdings.map(h => (
-                <tr key={h.id} className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors">
+              {holdings.map((h, i) => (
+                <tr 
+                  key={h.id} 
+                  className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
                   <td className="p-4 font-medium text-brand-primary">
                     <Link to={`/markets/${h.symbol}`} className="hover:underline">{h.symbol}</Link>
                   </td>
                   <td className="p-4 tabular-nums text-right">{h.quantity}</td>
                   <td className="p-4 tabular-nums text-right">₹{h.averageBuyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                  <td className="p-4 tabular-nums text-right">₹{h.currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                  <td className="p-4 tabular-nums text-right">₹{h.investedValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                  <td className="p-4 tabular-nums text-right font-medium">₹{h.currentValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                  <td className="p-4 tabular-nums text-right">
+                    <CountUp value={h.currentPrice} prefix="₹" />
+                  </td>
+                  <td className="p-4 tabular-nums text-right">
+                    <CountUp value={h.investedValue} prefix="₹" />
+                  </td>
+                  <td className="p-4 tabular-nums text-right font-medium">
+                    <CountUp value={h.currentValue} prefix="₹" />
+                  </td>
                   <td className={`p-4 tabular-nums text-right font-medium ${h.pnl >= 0 ? 'text-success' : 'text-danger'}`}>
-                    {h.pnl >= 0 ? '+' : ''}₹{h.pnl.toLocaleString('en-IN', { minimumFractionDigits: 2 })} <br/>
-                    <span className="text-xs">({h.pnl >= 0 ? '+' : ''}{h.pnlPercent.toFixed(2)}%)</span>
+                    <CountUp 
+                      value={h.pnl} 
+                      prefix={h.pnl >= 0 ? '+₹' : '-₹'} 
+                      valueOverride={Math.abs(h.pnl)}
+                    />
+                    <br/>
+                    <span className="text-xs">
+                      ({h.pnl >= 0 ? '+' : ''}
+                      <CountUp value={h.pnlPercent} suffix="%" />)
+                    </span>
                   </td>
                 </tr>
               ))}

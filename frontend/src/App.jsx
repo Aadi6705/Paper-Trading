@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -15,7 +16,8 @@ import AdminDashboard from './pages/AdminDashboard';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -88,6 +90,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

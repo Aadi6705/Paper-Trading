@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { walletApi } from '../services/walletApi';
 import { Link } from 'react-router-dom';
+import CountUp from '../components/CountUp';
+import { SkeletonTable } from '../components/Skeleton';
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -19,7 +21,7 @@ export default function Transactions() {
   }, []);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Transaction History</h1>
         <Link to="/dashboard" className="px-4 py-2 bg-bg-surface border border-border-subtle rounded-lg hover:bg-bg-surface-raised transition-colors">
@@ -29,7 +31,7 @@ export default function Transactions() {
 
       <div className="bg-bg-surface rounded-xl border border-border-subtle overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-text-secondary">Loading transactions...</div>
+          <SkeletonTable columns={4} rows={6} className="border-0 rounded-none" />
         ) : transactions.length === 0 ? (
           <div className="p-8 text-center text-text-secondary">No transactions yet.</div>
         ) : (
@@ -43,8 +45,12 @@ export default function Transactions() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map(tx => (
-                <tr key={tx.id} className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors">
+              {transactions.map((tx, i) => (
+                <tr 
+                  key={tx.id} 
+                  className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both"
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
                   <td className="p-4 text-sm tabular-nums text-text-secondary">
                     {new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString()}
                   </td>
@@ -60,7 +66,7 @@ export default function Transactions() {
                   <td className={`p-4 text-sm tabular-nums font-medium text-right ${
                     tx.type === 'BUY' ? 'text-danger' : 'text-success'
                   }`}>
-                    {tx.type === 'BUY' ? '-' : '+'}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <CountUp value={tx.amount} prefix={tx.type === 'BUY' ? '-₹' : '+₹'} />
                   </td>
                   <td className="p-4 text-sm text-text-secondary">{tx.description || '-'}</td>
                 </tr>

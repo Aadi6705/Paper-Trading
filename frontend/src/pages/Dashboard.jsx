@@ -4,6 +4,7 @@ import { portfolioApi } from '../services/portfolioApi';
 import { stockApi } from '../services/stockApi';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import CountUp from '../components/CountUp';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -40,25 +41,25 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex gap-4">
           {user?.role === 'ADMIN' && (
-            <Link to="/admin" className="px-4 py-2 text-warning hover:underline flex items-center">
+            <Link to="/admin" className="px-4 py-2 text-warning hover:underline flex items-center transition-colors">
               Admin Panel
             </Link>
           )}
           <Link to="/markets" className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-hover flex items-center transition-colors">
             Browse Markets
           </Link>
-          <Link to="/portfolio" className="px-4 py-2 text-brand-primary hover:underline flex items-center">
+          <Link to="/portfolio" className="px-4 py-2 text-brand-primary hover:underline flex items-center transition-colors">
             Portfolio
           </Link>
-          <Link to="/transactions" className="px-4 py-2 text-brand-primary hover:underline flex items-center">
+          <Link to="/transactions" className="px-4 py-2 text-brand-primary hover:underline flex items-center transition-colors">
             Transactions
           </Link>
-          <Link to="/orders" className="px-4 py-2 text-brand-primary hover:underline flex items-center">
+          <Link to="/orders" className="px-4 py-2 text-brand-primary hover:underline flex items-center transition-colors">
             Orders
           </Link>
           <button 
@@ -72,7 +73,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* User Info */}
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle hover:bg-bg-surface-raised transition-colors">
           <h2 className="text-lg font-semibold mb-4">Profile Details</h2>
           <ul className="space-y-2 font-mono text-sm">
             <li>Name: <span className="text-text-primary">{user.name}</span></li>
@@ -83,31 +84,52 @@ export default function Dashboard() {
         </div>
 
         {/* Portfolio Summary */}
-        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle flex flex-col justify-center">
+        <div className="p-6 bg-bg-surface rounded-xl border border-border-subtle flex flex-col justify-center hover:bg-bg-surface-raised transition-colors">
           <h2 className="text-sm font-medium text-text-secondary mb-4">Financial Overview</h2>
           {portfolio ? (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-in fade-in">
               <div>
                 <p className="text-xs text-text-secondary mb-1">Net Worth</p>
                 <div className="text-3xl font-bold text-success tabular-nums">
-                  ₹{portfolio.summary.netWorth.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  <CountUp value={portfolio.summary.netWorth} prefix="₹" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-subtle">
                 <div>
                   <p className="text-xs text-text-secondary mb-1">Available Cash</p>
-                  <p className="text-lg font-semibold tabular-nums">₹{portfolio.summary.cashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-semibold tabular-nums">
+                    <CountUp value={portfolio.summary.cashBalance} prefix="₹" />
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-text-secondary mb-1">Overall P&L</p>
                   <p className={`text-lg font-semibold tabular-nums ${portfolio.summary.totalPnl >= 0 ? 'text-success' : 'text-danger'}`}>
-                    {portfolio.summary.totalPnl >= 0 ? '+' : ''}₹{portfolio.summary.totalPnl.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <CountUp 
+                      value={portfolio.summary.totalPnl} 
+                      prefix={portfolio.summary.totalPnl >= 0 ? '+₹' : '-₹'} 
+                      valueOverride={Math.abs(portfolio.summary.totalPnl)}
+                    />
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-2xl text-text-secondary">Loading...</div>
+            <div className="space-y-4">
+              <div>
+                <div className="h-4 w-20 bg-bg-surface-raised rounded-md animate-pulse mb-2"></div>
+                <div className="h-8 w-32 bg-bg-surface-raised rounded-md animate-pulse"></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-subtle">
+                <div>
+                  <div className="h-4 w-20 bg-bg-surface-raised rounded-md animate-pulse mb-2"></div>
+                  <div className="h-6 w-24 bg-bg-surface-raised rounded-md animate-pulse"></div>
+                </div>
+                <div>
+                  <div className="h-4 w-20 bg-bg-surface-raised rounded-md animate-pulse mb-2"></div>
+                  <div className="h-6 w-24 bg-bg-surface-raised rounded-md animate-pulse"></div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -128,15 +150,20 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="text-xl tabular-nums font-medium mb-1">
-                  ₹{stock.currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  <CountUp value={stock.currentPrice} prefix="₹" />
                 </div>
                 <div className={`text-sm font-semibold tabular-nums ${stock.changePercent >= 0 ? 'text-success' : 'text-danger'}`}>
-                  {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                  {stock.changePercent >= 0 ? '+' : ''}
+                  <CountUp value={stock.changePercent} suffix="%" />
                 </div>
               </Link>
             ))
           ) : (
-            <div className="col-span-4 text-text-secondary">Loading market data...</div>
+            <div className="col-span-4 text-text-secondary flex gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="flex-1 h-24 bg-bg-surface border border-border-subtle rounded-xl animate-pulse"></div>
+              ))}
+            </div>
           )}
         </div>
       </div>

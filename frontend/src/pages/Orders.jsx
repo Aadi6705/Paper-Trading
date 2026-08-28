@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { tradingApi } from '../services/tradingApi';
 import { Link } from 'react-router-dom';
+import CountUp from '../components/CountUp';
+import { SkeletonTable } from '../components/Skeleton';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -19,7 +21,7 @@ export default function Orders() {
   }, []);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Order History</h1>
         <Link to="/dashboard" className="px-4 py-2 bg-bg-surface border border-border-subtle rounded-lg hover:bg-bg-surface-raised transition-colors">
@@ -29,7 +31,7 @@ export default function Orders() {
 
       <div className="bg-bg-surface rounded-xl border border-border-subtle overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-text-secondary">Loading orders...</div>
+          <SkeletonTable columns={6} rows={6} className="border-0 rounded-none" />
         ) : orders.length === 0 ? (
           <div className="p-8 text-center text-text-secondary">No orders placed yet.</div>
         ) : (
@@ -45,8 +47,12 @@ export default function Orders() {
               </tr>
             </thead>
             <tbody>
-              {orders.map(order => (
-                <tr key={order.id} className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors">
+              {orders.map((order, i) => (
+                <tr 
+                  key={order.id} 
+                  className="border-b border-border-subtle last:border-0 hover:bg-bg-surface-raised transition-colors animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both"
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
                   <td className="p-4 text-sm tabular-nums text-text-secondary">
                     {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}
                   </td>
@@ -62,7 +68,7 @@ export default function Orders() {
                   </td>
                   <td className="p-4 tabular-nums text-right font-medium">{order.quantity}</td>
                   <td className="p-4 tabular-nums text-right font-medium">
-                    ₹{order.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <CountUp value={order.price} prefix="₹" />
                   </td>
                   <td className="p-4 text-sm">
                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${
