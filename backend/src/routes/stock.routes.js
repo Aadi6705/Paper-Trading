@@ -7,6 +7,7 @@ const authMiddleware = require('../middleware/auth.middleware');
 router.use(authMiddleware);
 
 router.get('/', stockController.getAllStocks);
+router.get('/stream', stockController.streamMarketData);
 router.get('/:symbol', stockController.getStock);
 router.get('/:symbol/history', stockController.getStockHistory);
 

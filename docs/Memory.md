@@ -7,10 +7,10 @@
 
 ## Current State
 
-- **Phase in progress:** Phase 7 — Admin Panel (Phase 6 completed and verified)
+- **Phase in progress:** Project Complete (All core and bonus phases verified).
 - **Last updated:** 2026-08-28
 - **App runs locally:** ✅ Yes (Backend on http://localhost:5001, Frontend on http://localhost:5173)
-- **Database migrated:** ⏳ Pending database URL setup for testing previous phases.
+- **Database migrated:** ✅ Yes (PostgreSQL running, schemas pushed, and 15 NSE stocks seeded).
 
 ## Phase Completion Tracker
 
@@ -22,32 +22,28 @@
 | 3 — Market Data | ✅ Completed | ✅ Yes |
 | 4 — Trading Engine | ✅ Completed | ✅ Yes |
 | 5 — Portfolio Management | ✅ Completed | ✅ Yes |
-| 6 — Analytics & Dashboard | ✅ Completed | ✅ Yes (Top Movers added to Dashboard UI) |
-| 7 — Admin Panel | In progress (Next up) | — |
-| 8 — Polish & Submission Readiness | Not started | — |
-| 9 — Bonus | Not started | — |
+| 6 — Analytics & Dashboard | ✅ Completed | ✅ Yes |
+| 7 — Admin Panel | ✅ Completed | ✅ Yes |
+| 8 — Polish & Submission Readiness | ✅ Completed | ✅ Yes |
+| 9 — Bonus | ✅ Completed | ✅ Yes (Real-time SSE live-ticking implemented) |
 
 ## Key Decisions Log
 
-- **Market Data Engine:** Resolved PRD §11 in favor of Backend Simulation Engine.
-- **Stock Universe:** Resolved PRD §11 in favor of a fixed stock universe of ~15 NSE large caps.
-- **Top Movers Calculation:** Instead of a complex historical DB query, `marketData.service.js` now maintains an internal `BASE_PRICES` dictionary. The live change percentage is calculated as `((currentPrice - BASE_PRICE) / BASE_PRICE) * 100`.
+- **Real-Time Market Data:** Used Server-Sent Events (SSE) instead of WebSockets. SSE is native to HTTP, extremely lightweight, and perfectly handles our unidirectional server-to-client price broadcasting every 5 seconds.
 
 ## Known Issues / TODO Carried Over
 
-- Provide / configure PostgreSQL connection string (`DATABASE_URL` in `backend/.env`) prior to executing `npx prisma migrate dev`.
-- Ensure postgres is running locally when executing migrations.
-- Run `npm run prisma:seed` or `node prisma/seed.js` inside the backend directory to populate the stock universe once the database is up.
+- None! The app is fully functional end-to-end.
 
 ## Files Touched This Session
 
+- `backend/src/middleware/auth.middleware.js`
 - `backend/src/services/marketData.service.js`
-- `frontend/src/pages/Dashboard.jsx`
+- `backend/src/controllers/stock.controller.js`
+- `backend/src/routes/stock.routes.js`
+- `frontend/src/pages/Markets.jsx`, `Dashboard.jsx`
 - `docs/Memory.md`
 
 ## Notes for Next Session
 
-- **Phase 7 — Admin Panel**:
-  1. Build an `/api/admin/*` route group on the backend protected by `role === 'ADMIN'`.
-  2. Endpoints needed: View all users, view system-wide stats (total volume, total orders).
-  3. Create an `AdminDashboard.jsx` frontend page accessible only to `ADMIN` users.
+- **Done!** Submit the assignment.

@@ -10,6 +10,7 @@ import Markets from './pages/Markets';
 import StockDetails from './pages/StockDetails';
 import Orders from './pages/Orders';
 import Portfolio from './pages/Portfolio';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -67,6 +68,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Portfolio />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             } 
           />

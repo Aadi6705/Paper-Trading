@@ -3,21 +3,34 @@ import { Link } from 'react-router-dom';
 import { stockApi } from '../services/stockApi';
 import { Search } from 'lucide-react';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+
 export default function Markets() {
   const [stocks, setStocks] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    stockApi.getAllStocks()
-      .then(data => {
+    const token = localStorage.getItem('token');
+    const eventSource = new EventSource(`${BASE_URL}/api/stocks/stream?token=${token}`);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.success) {
+        setStocks(data.data);
+        setLoading(false);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE Error:', err);
+      stockApi.getAllStocks().then(data => {
         setStocks(data);
         setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+      }).catch(console.error);
+    };
+
+    return () => eventSource.close();
   }, []);
 
   const filteredStocks = stocks.filter(s => 

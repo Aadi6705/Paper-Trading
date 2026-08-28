@@ -1,4 +1,5 @@
 const prisma = require('../models/prismaClient');
+const EventEmitter = require('events');
 
 // Base prices for our simulated universe
 const BASE_PRICES = {
@@ -19,8 +20,9 @@ const BASE_PRICES = {
   'TATAMOTORS': 980.70,
 };
 
-class MarketDataService {
+class MarketDataService extends EventEmitter {
   constructor() {
+    super();
     this.currentPrices = { ...BASE_PRICES };
     this.lastUpdate = Date.now();
     
@@ -43,6 +45,7 @@ class MarketDataService {
 
       this.currentPrices[symbol] = parseFloat(newPrice.toFixed(2));
     }
+    this.emit('priceUpdate');
   }
 
   async getAllStocks() {

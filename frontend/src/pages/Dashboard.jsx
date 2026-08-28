@@ -15,13 +15,28 @@ export default function Dashboard() {
       .then(setPortfolio)
       .catch(console.error);
 
-    stockApi.getAllStocks()
-      .then(data => {
-        // Sort by absolute change percentage to find top movers (gainers or losers)
-        const sorted = [...data].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+    const token = localStorage.getItem('token');
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'}/api/stocks/stream?token=${token}`);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.success) {
+        const sorted = [...data.data].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
         setMovers(sorted.slice(0, 4));
-      })
-      .catch(console.error);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE Error on Dashboard:', err);
+      stockApi.getAllStocks()
+        .then(data => {
+          const sorted = [...data].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+          setMovers(sorted.slice(0, 4));
+        })
+        .catch(console.error);
+    };
+
+    return () => eventSource.close();
   }, []);
 
   return (
@@ -29,6 +44,11 @@ export default function Dashboard() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex gap-4">
+          {user?.role === 'ADMIN' && (
+            <Link to="/admin" className="px-4 py-2 text-warning hover:underline flex items-center">
+              Admin Panel
+            </Link>
+          )}
           <Link to="/markets" className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-hover flex items-center transition-colors">
             Browse Markets
           </Link>
