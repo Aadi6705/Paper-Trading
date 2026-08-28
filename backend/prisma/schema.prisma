@@ -23,6 +23,8 @@ model User {
 
   wallet       Wallet?
   transactions Transaction[]
+  orders       Order[]
+  holdings     Holding[]
 
   @@map("users")
 }
@@ -32,6 +34,22 @@ enum TransactionType {
   BUY
   SELL
   REFUND
+}
+
+enum OrderStatus {
+  PENDING
+  EXECUTED
+  CANCELLED
+  REJECTED
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderType {
+  MARKET
 }
 
 model Wallet {
@@ -58,4 +76,51 @@ model Transaction {
   user User @relation(fields: [userId], references: [id])
 
   @@map("transactions")
+}
+
+model Stock {
+  id          String   @id @default(uuid())
+  symbol      String   @unique
+  companyName String   @map("company_name")
+  exchange    String   @default("NSE")
+  sector      String?
+
+  orders      Order[]
+  holdings    Holding[]
+
+  @@map("stocks")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  stockId     String      @map("stock_id")
+  orderType   OrderType   @map("order_type") @default(MARKET)
+  side        OrderSide
+  quantity    Int
+  price       Float
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  executedAt  DateTime?   @map("executed_at")
+
+  user        User        @relation(fields: [userId], references: [id])
+  stock       Stock       @relation(fields: [stockId], references: [id])
+
+  @@map("orders")
+}
+
+model Holding {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  stockId         String   @map("stock_id")
+  quantity        Int
+  averageBuyPrice Float    @map("average_buy_price")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id])
+  stock           Stock    @relation(fields: [stockId], references: [id])
+
+  @@unique([userId, stockId])
+  @@map("holdings")
 }

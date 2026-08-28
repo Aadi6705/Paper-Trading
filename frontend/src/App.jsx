@@ -6,6 +6,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
+import Markets from './pages/Markets';
+import StockDetails from './pages/StockDetails';
+import Orders from './pages/Orders';
+import Portfolio from './pages/Portfolio';
 
 function App() {
   return (
@@ -30,6 +34,39 @@ function App() {
             element={
               <ProtectedRoute>
                 <Transactions />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/orders" 
+            element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/markets" 
+            element={
+              <ProtectedRoute>
+                <Markets />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/markets/:symbol" 
+            element={
+              <ProtectedRoute>
+                <StockDetails />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/portfolio" 
+            element={
+              <ProtectedRoute>
+                <Portfolio />
               </ProtectedRoute>
             } 
           />
